@@ -16,13 +16,10 @@ function getDataByCategory(category_name){
         db.collection('Products').find({category:category_name}).toArray((error,response)=>{
             if(error)
                 return console.log('Not able to retrieve the ata from mongodb');
-            //console.log(response);
-            console.log('T',response);
+  
 
             for(let ob of Object.entries(response))
                 {
-                    //console.log(response[ob])
-                    //console.log(ob[1].Object.keys(ob[1]))
                     console.log(Object.keys(ob[1])[1],ob[1][Object.keys(ob[1])[1]])
                 }
 

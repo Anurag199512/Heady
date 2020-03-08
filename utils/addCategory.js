@@ -9,16 +9,16 @@ const databaseName='Heady';
 
 async function addCategory(categoryName,subCategoryName=''){
  
-  
+  return new Promise((resolve,reject)=>{
     if(subCategoryName.length==0){
         Mongoclient.connect(connectionUrl,{useUnifiedTopology:true},(error,client)=>{
             
 
-            //if connection failes then return a error message
+            //if connection fail's then return a error message
             if(error)
                 {
-                    //console.log(error)
-                    return console.log("Cannot connect to the Mongo DB");
+                    
+                    reject({"error":"Cannot connect to the Mongo DB"});
                 }
 
             //connecting to the database
@@ -26,18 +26,17 @@ async function addCategory(categoryName,subCategoryName=''){
            
             db.collection('Categories').insertOne({[categoryName]:{}})
 
-            console.log('Category added');
+            resolve({"Success":`Category ${categoryName} added as main category`});
 
         })
     }
     else{
         Mongoclient.connect(connectionUrl,{useUnifiedTopology:true},(error,client)=>{
             
-            //if connection failes then return a error message
+            //if connection fail's then return a error message
             if(error)
                 {
-                    //return console.log(error)
-                    console.log("Cannot connect to the Mongo DB");
+                    reject({"error":"Cannot connect to the Mongo DB"});
                 }
 
             //connecting to the database
@@ -46,38 +45,31 @@ async function addCategory(categoryName,subCategoryName=''){
             db.collection('Categories').find({[categoryName]:{$exists:true}}).toArray((error,response)=>{
                 
                 //checking if the product with the defined category is already present 
-                let data;
+                let data={};
             
                 if(response.length==0){
-                    db.collection('Categories').insertOne({[categoryName]:{id:uuid.v4(),[subCategoryName]:[]}});
-                    console.log(`New category ${categoryName} added with subcategory ${subCategoryName}`);
+                    db.collection('Categories').insertOne({[categoryName]:{[subCategoryName]:{id:uuid.v4(),child_categories:[]}}});
+                    resolve({"Success":`New category ${categoryName} added with subcategory ${subCategoryName}`});
                 }
                 else
                 {
-                    console.log('R',response)
-                    for(let a in response[0][categoryName])
-                    {
-                        //console.log('t',response[0][categoryName][a])
-                        data=response[0][categoryName][a];
-                    }
-
-                    data.push(subCategoryName);
-                    
+                   response[0][categoryName][subCategoryName]={id:uuid.v4(),child_categories:[]};
+ 
                     db.collection('Categories').update({[categoryName]:{$exists:true}},
-                        {[categoryName]:{[subCategoryName]:data}},
+                        {[categoryName]:response[0][categoryName]},
                         (err,resp)=>{
 
                         if(err)
-                            console.log('Not able to update',err)
+                            reject({"error":"Not able to add sub sub category in the DB"})
                         else
-                            console.log(`New subcategory ${subCategoryName} added to category ${categoryName}`);
+                            resolve({"Success":`New subcategory ${subCategoryName} added to category ${categoryName}`});
                     
                     })                    
                 }
             })
         })
     }
-
+})
 }
 
 

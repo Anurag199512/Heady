@@ -1,12 +1,13 @@
 const express=require('express');
-const func=require('./utils/addCategory')
-const getData=require('./utils/getAllCategory')
-const addProduct=require('./utils/addProduct')
-const getDataByCategory =require('./utils/getDataByCategory')
+const func=require('./utils/addCategory');
+const getData=require('./utils/getAllCategory');
+const addProduct=require('./utils/addProduct');
+const getDataByCategory =require('./utils/getDataByCategory');
+const addChildCategory=require('./utils/addChildCategory');
 const app=express();
-getData();
+const bodyParser = require("body-parser");
 
-// addProduct('soap','s1','s2')
+//addProduct('soap','s1111','s22222')
 // addProduct('lux','s12')
 // addProduct('cinthol','s1')
 
@@ -15,30 +16,59 @@ getData();
 //func.addCategory('sometihng');
 getDataByCategory('s12');
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+
+//will display the current state of database
 app.get('/',(req,res)=>{
-    console.log('G',req.query.category);
-    if(req.query.category && req.query.subCategory) 
-        func.addCategory(req.query.category,req.query.subCategory);
-    else  if(req.query.category)
-        func.addCategory(req.query.category);
-
-    res.send('helloa');
+    getData().then((data)=>{
+        res.send(data);
+    }).catch((error)=>{
+        res.send(error);
+    });
 });
 
-/*Sample request object 
 
-1-if only category is getting added
-    {
-
-    }
-2- if subcategory is required to be added along with category or subcategory is only being added
-    {
-
-    }
-*/
+//to add a sub category in already added categories
 app.post('/addCategory',(req,res)=>{
-    
+     
+    if(req.body.name && req.body.subcategory)
+        {
+            func.addCategory(req.body.name,req.body.subcategory).then((data)=>{
+            res.send(data);
+            }).catch((error)=>{
+                res.send(error);
+            });
+        }
+    else if(req.body.name)
+        {
+            func.addCategory(req.body.name).then((data)=>{
+            res.send(data);
+            }).catch((error)=>{
+                res.send(error);
+            });
+        }
+    else{
+        res.send({"error":"Provide the value of name for the category"})
+    }    
 });
+
+
+//to add a child category in already added categories
+app.post('/addChildCategory',(req,res)=>{
+    if(req.body.name && req.body.subcategory  && req.body.childCategory)
+        {
+            addChildCategory(req.body.name,req.body.subcategory,req.body.childCategory).then((data)=>{
+            res.send(data)
+            }).catch((error)=>{
+                res.send(error)
+            });
+        }
+    else{
+        res.send({"error":"Provide the value of name for the category and the subcategory to add the child category"})
+    }    
+});
+
 
 app.listen(3000,()=>{
     console.log('Server listening on port 3000');

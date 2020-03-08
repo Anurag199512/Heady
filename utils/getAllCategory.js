@@ -6,28 +6,34 @@ const connectionUrl='mongodb+srv://client:client1234@cluster0-qlkny.mongodb.net/
 const databaseName='Heady';
 
 
-function getAllcategory(){
-    Mongoclient.connect(connectionUrl,{useUnifiedTopology:true},(error,client)=>{
+function getAllCategory(){
+return new Promise((resolve,reject)=>{
+       Mongoclient.connect(connectionUrl,{useUnifiedTopology:true},(error,client)=>{
         if(error)
-            return  console.log("Cannot connect to the Mongo DB");
+            reject({"Error":"Cannot connect to the Mongo DB"});
         
         let db=client.db(databaseName); 
 
         db.collection('Categories').find().toArray((error,response)=>{
             if(error)
                 return console.log('Not able to retrieve the ata from mongodb');
-            //console.log(response);
-            console.log();
+
+            let data=[]
             for(let ob of Object.entries(response))
                 {
-                    //console.log(response[ob])
-                    //console.log(ob[1].Object.keys(ob[1]))
                     console.log(Object.keys(ob[1])[1],ob[1][Object.keys(ob[1])[1]])
-                }
+                    data.push({
+                        "category_name":Object.keys(ob[1])[1],
+                        "subcategory_name":ob[1][Object.keys(ob[1])[1]]
+                        
+                    })
 
-        });
-        
+                }
+            resolve(data);
+       });
+       
     })
+})
 }
 
-module.exports=getAllcategory;
+module.exports=getAllCategory;

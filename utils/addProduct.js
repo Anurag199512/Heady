@@ -16,7 +16,7 @@ if(productName=='' && category.length==0)
 
         Mongoclient.connect(connectionUrl,{useUnifiedTopology:true},(error,client)=>{
 
-            //if connection failes then return a error message
+            //if connection fail's then return a error message
             if(error)
                 {
                     return console.log("Cannot connect to the Mongo DB");
@@ -43,14 +43,15 @@ if(productName=='' && category.length==0)
                 }
             })
            
-        db.collection('Categories').find({name:category}).toArray((error,response)=>{
+        for(let cat in category) {   
+        db.collection('Categories').find({name:cat}).toArray((error,response)=>{
             
             //checking if the category do not exist in the list then only insert it
             if(response.length==0){
-                db.collection('Categories').insertOne({[category]:{}})
+                db.collection('Categories').insertOne({[category[cat]]:{}})
                 //db.collection('category').insertOne({'name':category});
             }
-        })
+        })}
          
     })
 }
