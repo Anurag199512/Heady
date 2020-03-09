@@ -14,22 +14,11 @@ return new Promise((resolve,reject)=>{
         
         let db=client.db(databaseName); 
 
-        db.collection('Categories').find().toArray((error,response)=>{
+        db.collection('Products').find().toArray((error,response)=>{
             if(error)
                 reject('Not able to retrieve the ata from mongodb');
 
-            let data=[]
-            for(let ob of Object.entries(response))
-                {
-                  
-                    data.push({
-                        "category_name":Object.keys(ob[1])[1],
-                        "subcategory_name":ob[1][Object.keys(ob[1])[1]]
-                        
-                    })
-
-                }
-            resolve(data);
+            resolve(response);
        });
        
     })

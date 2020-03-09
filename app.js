@@ -4,24 +4,20 @@ const getData=require('./utils/getAllCategory');
 const addProduct=require('./utils/addProduct');
 const getDataByCategory =require('./utils/getDataByCategory');
 const addChildCategory=require('./utils/addChildCategory');
+const updateProduct=require('./utils/updateProduct');
+const getProductDetails=require('./utils/getProductDetails');
+
 const app=express();
 const bodyParser = require("body-parser");
 
-//addProduct('soap','s1111','s22222')
-// addProduct('lux','s12')
-// addProduct('cinthol','s1')
-
-//func.addCategory('pharma');
-//func.addCategory('pharma12','pha231');
-//func.addCategory('sometihng');
-getDataByCategory('s12');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-//will display the current state of database
-app.get('/',(req,res)=>{
-    getData().then((data)=>{
+
+
+app.get('/getProductDetails',(req,res)=>{
+    getProductDetails().then((data)=>{
         res.send(data);
     }).catch((error)=>{
         res.send(error);
@@ -29,9 +25,11 @@ app.get('/',(req,res)=>{
 });
 
 
-//to add a sub category in already added categories
+
+
+
+//task 1 -to add a sub category in already added categories
 app.post('/addCategory',(req,res)=>{
-     
     if(req.body.name && req.body.subcategory)
         {
             func.addCategory(req.body.name,req.body.subcategory).then((data)=>{
@@ -54,7 +52,7 @@ app.post('/addCategory',(req,res)=>{
 });
 
 
-//to add a child category in already added categories
+//task 1 -to add a child category in already added categories
 app.post('/addChildCategory',(req,res)=>{
     if(req.body.name && req.body.subcategory  && req.body.childCategory)
         {
@@ -68,6 +66,57 @@ app.post('/addChildCategory',(req,res)=>{
         res.send({"error":"Provide the value of name for the category and the subcategory to add the child category"})
     }    
 });
+
+//task 2- add a product and map it to different categories
+app.post('/addProduct',(req,res)=>{
+
+    if(req.body.name && req.body.price && req.body.category.length>0)
+        {
+            addProduct(req.body.name,req.body.price,req.body.category).then((data)=>{
+            res.send(data);
+            }).catch((error)=>{
+                res.send(error);
+            });
+        }
+    else{
+        res.send({"error":"Provide all the values in proper req format "})
+    }    
+});
+
+//task 3- will display the current state of database to return all the category and child category
+app.get('/',(req,res)=>{
+    getData().then((data)=>{
+        res.send(data);
+    }).catch((error)=>{
+        res.send(error);
+    });
+});
+
+//task 4- will display the all the products having the mentioned category
+app.get('/categoryData',(req,res)=>{
+    getDataByCategory(req.body.category).then((data)=>{
+        res.send(data);
+    }).catch((error)=>{
+        res.send(error);
+    });
+});
+
+//task 5
+app.post('/updateProduct',(req,res)=>{
+
+    if(req.body.id)
+        {
+            updateProduct(req.body.id,req.body.name,req.body.price).then((data)=>{
+                res.send(data);
+            }).catch((error)=>{
+                res.send(error);
+            });
+        }
+    else{
+        res.send({"error":"Provide all the values in proper req format "})
+    }    
+});
+
 
 
 app.listen(3000,()=>{
