@@ -44,20 +44,33 @@ function addProduct(productName,price,category){
                         
                     }
                 })
-            
-            for(let cat in category) {   
-            db.collection('Categories').find({name:cat}).toArray((error,response)=>{
+            if(typeof(category)!=='string'){
+                for(let cat in category) {   
+                db.collection('Categories').find({name:cat}).toArray((error,response)=>{
                 
-                if(error)
-                    {
-                        reject({"Error":"Cannot connect to the Mongo DB"});
+                    if(error)
+                        {
+                            reject({"Error":"Cannot connect to the Mongo DB"});
+                        }
+                    //checking if the category do not exist in the list then only insert it in DB
+                    if(response.length==0){
+                        db.collection('Categories').insertOne({[category[cat]]:{}})
                     }
-                //checking if the category do not exist in the list then only insert it in DB
-                if(response.length==0){
-                    db.collection('Categories').insertOne({[category[cat]]:{}})
-                }
-            })}
-            
+                })}
+            }
+            else{ 
+                db.collection('Categories').find({name:category}).toArray((error,response)=>{
+                
+                    if(error)
+                        {
+                            reject({"Error":"Cannot connect to the Mongo DB"});
+                        }
+                    //checking if the category do not exist in the list then only insert it in DB
+                    if(response.length==0){
+                        db.collection('Categories').insertOne({[category]:{}})
+                    }
+                })
+            }
         })
     })
 }
